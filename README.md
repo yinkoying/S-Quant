@@ -40,8 +40,6 @@ S-Quant provides banks with actionable, data-driven **social KPIs** that can be 
 
 ---
 
-## 繁體中文
-
 ## 🎯 核心問題
 
 在永續金融領域中，ESG 的「E」（環境）已有明確的衡量指標，如碳排放；「G」（治理）也有完善的制度性框架。然而，**「S」（社會面）**——例如人權、勞動條件、職場安全等——至今仍難以量化。
