@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S-Quant: 量化 ESG 中的「S」</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Poppins 和 Noto Sans TC 字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 應用字體 */
+        body {
+            /* 優先使用 Poppins, 中文回退到 Noto Sans TC */
+            font-family: 'Poppins', 'Noto Sans TC', sans-serif;
+        }
+        /* 確保標題也應用 Poppins */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', 'Noto Sans TC', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 leading-relaxed">
+
+    <!-- 頁首 -->
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-3xl font-bold text-green-700">
+                S-Quant
+            </div>
+            <div class="text-lg font-medium text-gray-600 hidden md:block">
+                Quantifying the “S” in ESG
+            </div>
+        </nav>
+    </header>
+
+    <!-- 主內容區域 -->
+    <main class="container mx-auto p-4 md:p-8 my-8">
+        
+        <!-- 主要介紹卡片 -->
+        <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
+            
+            <!-- 專案視覺/標題 -->
+            <div class="bg-gradient-to-r from-green-600 to-emerald-700 p-8 md:p-12 text-white">
+                <h1 class="text-4xl md:text-5xl font-bold mb-3">S-Quant</h1>
+                <p class="text-2xl md:text-3xl font-light opacity-90">一個 AI 驅動的社會績效量化平台</p>
+                <p class="text-2xl md:text-3xl font-light opacity-90">An AI-Powered Social Performance Quantification Platform</p>
+            </div>
+
+            <!-- 內容 -->
+            <div class="p-6 md:p-10">
+
+                <!-- 繁體中文內容 -->
+                <section id="zh-tw" class="mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 border-l-4 border-green-600 pl-4">
+                        專案介紹
+                    </h2>
+
+                    <div class="space-y-6">
+                        <p class="text-lg">在永續金融領域中，ESG 的「E」（環境）已有明確的衡量指標，如碳排放；「G」（治理）也有完善的制度性框架。然而，<strong class="font-semibold text-green-700">「S」（社會面）(例如人權、勞動條件、職場安全等) 至今仍難以量化。</strong>銀行難以將社會風險納入永續連結貸款（SLL）的評估之中，而企業也缺乏可信、即時的數據來證明自身的社會績效。</p>
+                        
+                        <p class="text-lg">S-Quant 是一套建構於 Google Cloud 之上的 AI 驅動「社會績效量化平台」。我們的解決方案協助銀行與企業，以一致、可審計的方式衡量人權風險與社會價值創造。</p>
+
+                        <div class="grid md:grid-cols-2 gap-6 mt-6">
+                            <!-- 風險面 -->
+                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <h3 class="text-2xl font-semibold text-gray-900 mb-3">風險面 (Risk)</h3>
+                                <p>我們使用 Vertex AI 分析全球多語新聞、NGO 報告與匿名化後的企業內部申訴紀錄。系統會自動分類與評分各類人權相關事件（例如強迫勞動、歧視、性騷擾、職安事故），並為每家企業產生「人權風險指標」（Human Rights Risk Score）。所有事件級與彙整後的分數皆儲存在 BigQuery 中，支持企業進行持續性的人權盡職調查（HRDD）。</p>
+                            </div>
+                            <!-- 價值面 -->
+                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <h3 class="text-2xl font-semibold text-gray-900 mb-3">價值面 (Value)</h3>
+                                <p>我們採用「社會投資報酬率」（SROI）框架。透過企業提供的員工訓練、職安計畫、多元共融活動、社區投入等資料，我們將其轉換為可被驗證的「貨幣化社會價值」，並為重要方案計算 SROI 比率。這些資料同樣儲存在 BigQuery 中，並透過儀表板進行視覺化呈現。</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <h3 class="text-2xl font-semibold text-gray-900 mb-4">技術與願景</h3>
+                            <p class="text-lg mb-4">透過 Vertex AI、BigQuery、Cloud Run、Cloud Functions 與 Looker Studio，S-Quant 為銀行提供可直接用於 SLL（永續連結貸款）結構設計的「社會面 KPI」。我們的目標，是讓永續金融不再只依靠碳排數據，而是真正將人權風險與社會影響納入金融定價，開啟新一代以人為本的永續貸款。</p>
+                            
+                            <!-- 技術堆疊標籤 -->
+                            <div class="flex flex-wrap gap-3">
+                                <span class="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">Vertex AI</span>
+                                <span class="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">BigQuery</span>
+                                <span class="bg-gray-200 text-gray-800 text-sm font-medium px-3 py-1 rounded-full">Cloud Run</span>
+                                <span class="bg-gray-200 text-gray-800 text-sm font-medium px-3 py-1 rounded-full">Cloud Functions</span>
+                                <span class="bg-emerald-100 text-emerald-800 text-sm font-m
+edium px-3 py-1 rounded-full">Looker Studio</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 分隔線 -->
+                <hr class="my-12 border-gray-200">
+
+                <!-- 英文內容 -->
+                <section id="en-us">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 border-l-4 border-emerald-700 pl-4">
+                        Project Description
+                    </h2>
+
+                    <div class="space-y-6">
+                        <p class="text-lg">In sustainable finance, the “E” in ESG has clear metrics like carbon emissions, and “G” is backed by governance indicators. However, <strong class="font-semibold text-emerald-800">the “S” (social factors such as human rights, labor conditions, and workplace safety) remains largely unquantified.</strong> Banks struggle to incorporate social risks into Sustainability-Linked Loans (SLL), and companies lack reliable, real-time data to demonstrate their social performance.</p>
+                        
+                        <p class="text-lg">S-Quant is an AI-powered social performance quantification platform built on Google Cloud. Our solution helps banks and enterprises measure both human rights risks and social value creation in a consistent, auditable way.</p>
+
+                        <div class="grid md:grid-cols-2 gap-6 mt-6">
+                            <!-- Risk Side -->
+                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <h3 class="text-2xl font-semibold text-gray-900 mb-3">On the Risk Side</h3>
+                                <p>We use Vertex AI to analyze global multi-language news, NGO reports, and anonymized internal grievance logs. We classify and score human-rights-related events (e.g. forced labor, discrimination, harassment, safety incidents) and generate a Human Rights Risk Score for each company. All event-level and aggregated scores are stored and updated in BigQuery, enabling continuous Human Rights Due Diligence (HRDD).</p>
+                            </div>
+                            <!-- Value Side -->
+                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <h3 class="text-2xl font-semibold text-gray-900 mb-3">On the Value Side</h3>
+                                <p>We implement a Social Return on Investment (SROI) framework. Using company data on employee training, occupational safety programs, diversity initiatives, and community projects, we estimate the monetized social value created and compute SROI ratios for key initiatives. These results are also stored in BigQuery and visualized through dashboards.</p>
+Copy
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <h3 class="text-2xl font-semibold text-gray-900 mb-4">Technology & Goal</h3>
+                            <p class="text-lg mb-4">Using Vertex AI, BigQuery, Cloud Run, Cloud Functions, and Looker Studio, S-Quant provides banks with actionable, data-driven social KPIs that can be integrated into SLL structures. Our goal is to move sustainable finance beyond carbon-only metrics and enable a new generation of loans that truly price in human rights risks and social impact.</p>
+                            
+                            <!-- Tech Stack Badges -->
+                            <div class="flex flex-wrap gap-3">
+                                <span class="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">Vertex AI</span>
+                                <span class="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">BigQuery</span>
+                                <span class="bg-gray-200 text-gray-800 text-sm font-medium px-3 py-1 rounded-full">Cloud Run</span>
+                                <span class="bg-gray-200 text-gray-800 text-sm font-medium px-3 py-1 rounded-full">Cloud Functions</span>
+                                <span class="bg-emerald-100 text-emerald-800 text-sm font-medium px-3 py-1 rounded-full">Looker Studio</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- 頁腳 -->
+    <footer class="text-center p-8 mt-8 text-gray-500 text-sm">
+        <p>&copy; 2025 S-Quant. All rights reserved.</p>
+        <p>A project dedicated to quantifying the "S" in ESG.</p>
+    </footer>
+
+</body>
+</html>
