@@ -1,7 +1,6 @@
 # Project S-Quant: Quantifying the “S” in ESG
 
-S-Quant 是一套以 Google Cloud 打造的 AI 社會績效量化平台，專注於解決 ESG 中最難量化的「社會面」。
-(S-Quant is an AI-powered social performance quantification platform built on Google Cloud, focusing on solving the most difficult part of ESG to quantify: the "S".)
+S-Quant is an AI-powered social performance quantification platform built on Google Cloud, focusing on solving the most difficult part of ESG to quantify: the "S".
 
 ---
 
