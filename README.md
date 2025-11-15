@@ -1,63 +1,11 @@
-# S-Quant — Quantifying the “S” in ESG  
-AI-Powered Social Performance Quantification Platform Built on Google Cloud
-
----
-
-## 🌐 Overview / 專案簡介
-
-**中文：**  
-S-Quant 是一套建構於 Google Cloud 的 AI 社會績效量化平台，專注於量化 ESG 中最難衡量的「社會」（S）面向。我們協助企業與銀行，以一致、可審計的方式衡量人權風險與社會價值。
-
-**English:**  
-S-Quant is an AI-powered social performance quantification platform built on Google Cloud. It provides consistent and auditable metrics for human rights risks and social value creation — enabling banks and enterprises to quantify the “S” in ESG.
-
----
-
-## 🧩 Problem Statement / 問題背景
-
-**中文：**  
-- ESG 的 E（環境）有成熟的碳排與能源指標  
-- G（治理）有制度性衡量框架  
-- **但 S（社會）長期缺乏可信、即時、可量化的數據**  
-- 銀行難以將社會風險納入永續連結貸款（SLL）  
-- 企業難以展示社會績效與符合法規（如 CSDDD）
-
-**English:**  
-The “S” in ESG — human rights, labor conditions, workplace safety — remains largely unquantified. Banks cannot incorporate social risks into Sustainability-Linked Loans (SLL), and companies lack reliable real-time data to demonstrate social performance.
-
----
-
-## 🚀 Solution / 解決方案
-
-S-Quant consists of **two AI-driven engines**:
-
-### 1️⃣ Human Rights Risk Engine (HRDD)
-- Analyzes global multi-language news  
-- Processes NGO reports  
-- Reads anonymized internal grievance logs  
-- Uses Vertex AI NLP for classification & severity scoring  
-- Outputs a **Human Rights Risk Score**  
-- Stored in **BigQuery** for continuous HRDD
-
-### 2️⃣ Social Return on Investment (SROI) Engine
-- Converts social actions (training, DEI, safety initiatives) into **monetized social value**  
-- Computes SROI ratios  
-- Visualized via **Looker Studio** dashboards
-
----
-
-## ☁️ Google Cloud Architecture / 技術架構
-
-**Services Used:**
-- Vertex AI — NLP models & inference  
-- BigQuery — data warehouse, KPI computation  
-- Cloud Run & Cloud Functions — ingestion, pipelines  
-- Cloud Storage — raw data layer  
-- Looker Studio — dashboards & analytics  
-
----
-
-## 🏗 Architecture Diagram (ASCII)
-
-以下是最穩定、不會跑版的流程圖：
-
+> **Project Name:** S-Quant — Quantifying the “S” in ESG
+>
+> In sustainable finance, the “E” in ESG has clear metrics like carbon emissions, and “G” is backed by governance indicators. However, the “S” — social factors such as human rights, labor conditions, and workplace safety — remains largely unquantified. Banks struggle to incorporate social risks into Sustainability-Linked Loans (SLL), and companies lack reliable, real-time data to demonstrate their social performance.
+>
+> **S-Quant** is an AI-powered social performance quantification platform built on Google Cloud. Our solution helps banks and enterprises measure both **human rights risks** and **social value creation** in a consistent, auditable way.
+>
+> On the **risk side**, we use **Vertex AI** to analyze global multi-language news, NGO reports, and anonymized internal grievance logs. We classify and score human-rights-related events (e.g. forced labor, discrimination, harassment, safety incidents) and generate a **Human Rights Risk Score** for each company. All event-level and aggregated scores are stored and updated in **BigQuery**, enabling continuous Human Rights Due Diligence (HRDD).
+>
+> On the **value side**, we implement a **Social Return on Investment (SROI)** framework. Using company data on employee training, occupational safety programs, diversity initiatives, and community projects, we estimate the monetized social value created and compute SROI ratios for key initiatives. These results are also stored in BigQuery and visualized through dashboards.
+>
+> Using **Vertex AI, BigQuery, Cloud Run, Cloud Functions, and Looker Studio**, S-Quant provides banks with actionable, data-driven social KPIs that can be integrated into SLL structures. Our goal is to move sustainable finance beyond carbon-only metrics and enable a new generation of loans that truly price in human rights risks and social impact.
