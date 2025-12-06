@@ -30,13 +30,22 @@
         .animate-fade-in {
             animation: fadeIn 0.4s ease-out forwards;
         }
+
+        /* 助理對話框動畫 */
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-up {
+            animation: slideInUp 0.3s ease-out forwards;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
         // --- 內嵌圖標庫 ---
         const IconBase = ({ children, size = 24, className = "", ...props }) => (
@@ -61,6 +70,7 @@
             LayoutDashboard: (props) => <IconBase {...props}><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></IconBase>,
             Leaf: (props) => <IconBase {...props}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 14 8 7 7 0 0 1-14 8z"/><path d="M8 21h4"/></IconBase>,
             Users: (props) => <IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconBase>,
+            User: (props) => <IconBase {...props}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></IconBase>,
             Truck: (props) => <IconBase {...props}><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></IconBase>,
             AlertTriangle: (props) => <IconBase {...props}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></IconBase>,
             ShieldCheck: (props) => <IconBase {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></IconBase>,
@@ -75,22 +85,26 @@
             History: (props) => <IconBase {...props}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></IconBase>,
             Lock: (props) => <IconBase {...props}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></IconBase>,
             Eye: (props) => <IconBase {...props}><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></IconBase>,
-            CheckCircle2: (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></IconBase>
+            CheckCircle2: (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></IconBase>,
+            MessageCircle: (props) => <IconBase {...props}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></IconBase>,
+            X: (props) => <IconBase {...props}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></IconBase>,
+            Send: (props) => <IconBase {...props}><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></IconBase>
         };
 
         const { 
-            LayoutDashboard, Leaf, Users, Truck, AlertTriangle, 
+            LayoutDashboard, Leaf, Users, User, Truck, AlertTriangle, 
             ShieldCheck, Newspaper, BrainCircuit, MapPin, TrendingUp, 
-            DollarSign, Activity, FileText, Download, History, Lock, Eye, CheckCircle2 
+            DollarSign, Activity, FileText, Download, History, Lock, Eye, CheckCircle2,
+            MessageCircle, X, Send
         } = Icons;
 
 
         // --- 模擬數據 ---
 
         const FLEET_DATA = [
-            { id: 'V-8821', driver: '陳大明', status: 'moving', carbon: 12.5, fuel_score: 85, fatigue_risk: 'Low', compliance: 98, location: '台北市內湖區' },
-            { id: 'V-9903', driver: '王小華', status: 'idle', carbon: 18.2, fuel_score: 62, fatigue_risk: 'High', compliance: 75, location: '桃園市龜山區' },
-            { id: 'V-7714', driver: '李志豪', status: 'moving', carbon: 14.1, fuel_score: 78, fatigue_risk: 'Medium', compliance: 88, location: '新北市三重區' },
+            { id: 'V-8821', driver: '陳大明', status: 'moving', carbon: 12.5, fuel_score: 85, fatigue_risk: 'Low', compliance: 98, social_score: 85, location: '台北市內湖區', engine_hours: 1240, idle_hours: 45 },
+            { id: 'V-9903', driver: '王小華', status: 'idle', carbon: 18.2, fuel_score: 62, fatigue_risk: 'High', compliance: 75, social_score: 62, location: '桃園市龜山區', engine_hours: 890, idle_hours: 120 },
+            { id: 'V-7714', driver: '李志豪', status: 'moving', carbon: 14.1, fuel_score: 78, fatigue_risk: 'Medium', compliance: 88, social_score: 91, location: '新北市三重區', engine_hours: 1560, idle_hours: 60 },
         ];
 
         const NEWS_RISKS = [
@@ -114,7 +128,6 @@
         // --- 元件 ---
 
         const NavItem = ({ icon, label, active, onClick, highlight, colorClass }) => {
-            // 統一導航樣式，移除過多的色彩裝飾，保持專業灰階與主色
             const baseClass = highlight && active 
                 ? 'bg-emerald-900/40 border-emerald-400 text-emerald-400' 
                 : (active ? 'bg-slate-800 border-emerald-500 text-white' : 'border-transparent text-slate-400 hover:bg-slate-800 hover:text-white');
@@ -130,7 +143,6 @@
             );
         };
 
-        // 優化後的 KpiCard：移除左側粗邊框，改用 Icon 背景色來區分，整體更乾淨
         const KpiCard = ({ title, value, trend, trendUp, icon, iconBgClass, iconColorClass, subtitle }) => (
             <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-4">
@@ -169,6 +181,78 @@
             );
         };
 
+        // --- 系統助理元件 ---
+        const SystemAssistant = () => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [messages, setMessages] = useState([
+                { id: 1, type: 'bot', text: '您好！我是 Eco-Logic 智能助理。請問有什麼我可以協助您的嗎？' }
+            ]);
+            const messagesEndRef = useRef(null);
+
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            };
+
+            useEffect(scrollToBottom, [messages]);
+
+            const handleQuestion = (question) => {
+                const userMsg = { id: Date.now(), type: 'user', text: question };
+                setMessages(prev => [...prev, userMsg]);
+
+                let botResponseText = "";
+                if (question.includes("查證連結")) {
+                    botResponseText = "「查證連結」是一個專為第三方查證單位（如 SGS、BSI）生成的「唯讀（Read-Only）連結」。\n\n您可以將此連結寄給查證員，讓他們在遠端就能檢視原始數據來源（如 IoT 紀錄）與 AI 計算邏輯。這能大幅縮短現場查核的時間，也就是所謂的「數位化確信 (Digital Assurance)」。";
+                } else if (question.includes("報告")) {
+                    botResponseText = "您可以在「查證與報告中心」下載各類合規報告。目前支援 ISO 14064-1 溫室氣體盤查報告與 SROI 社會影響力報告。";
+                } else {
+                    botResponseText = "收到您的詢問，我會盡快為您查詢相關資訊。";
+                }
+
+                setTimeout(() => {
+                    setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: botResponseText }]);
+                }, 600);
+            };
+
+            return (
+                <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+                    {isOpen && (
+                        <div className="mb-4 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-slide-up flex flex-col h-96">
+                            <div className="bg-slate-900 p-4 flex justify-between items-center text-white">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                                    <span className="font-bold text-sm">Eco-Logic Assistant</span>
+                                </div>
+                                <button onClick={() => setIsOpen(false)} className="hover:bg-slate-700 p-1 rounded"><X size={16}/></button>
+                            </div>
+                            <div className="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-3">
+                                {messages.map(msg => (
+                                    <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap ${msg.type === 'user' ? 'bg-emerald-600 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-700 rounded-bl-none shadow-sm'}`}>
+                                            {msg.text}
+                                        </div>
+                                    </div>
+                                ))}
+                                <div ref={messagesEndRef} />
+                            </div>
+                            <div className="p-3 bg-white border-t border-slate-100">
+                                <div className="text-[10px] text-slate-400 mb-2 font-bold uppercase">常見問題</div>
+                                <div className="flex flex-wrap gap-2">
+                                    <button onClick={() => handleQuestion("什麼是產生查證連結？")} className="text-xs bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 px-2 py-1 rounded-full border border-slate-200 transition-colors">什麼是查證連結？</button>
+                                    <button onClick={() => handleQuestion("如何下載報告？")} className="text-xs bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 px-2 py-1 rounded-full border border-slate-200 transition-colors">如何下載報告？</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <button 
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="w-14 h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                    >
+                        {isOpen ? <X size={24} /> : <MessageCircle size={28} />}
+                    </button>
+                </div>
+            );
+        };
+
         // --- 主程式 ---
 
         const App = () => {
@@ -176,6 +260,8 @@
             const [selectedVehicle, setSelectedVehicle] = useState(FLEET_DATA[1]);
             const [isAiScanning, setIsAiScanning] = useState(false);
             const [socialScore, setSocialScore] = useState(78);
+            const [detailModalOpen, setDetailModalOpen] = useState(false); // 控制環境數據詳情 Modal
+            const [socialModalOpen, setSocialModalOpen] = useState(false); // 控制社會價值詳情 Modal
 
             const handleAiScan = () => {
                 setIsAiScanning(true);
@@ -188,9 +274,97 @@
 
             const handleDownload = (report) => {
                 let content = "";
-                let filename = `${report.title}.txt`;
-                // ... (下載邏輯保持不變)
-                content = `[Simulated Report: ${report.title}]\nDate: ${new Date().toISOString()}`;
+                let filename = `${report.title || 'Report'}.txt`;
+
+                // 根據不同的報告類型，生成模擬內容
+                if (report.type === 'ISO') {
+                    content = `
+==================================================
+Eco-Logic | ISO 14064-1 溫室氣體盤查報告 (模擬)
+==================================================
+產生日期: ${new Date().toLocaleString()}
+查證狀態: 系統初核通過
+
+[Scope 1 直接排放]
+柴油燃燒: 1,240.5 kgCO2e
+  - 車輛 V-8821: 320.1 kg
+  - 車輛 V-9903: 240.8 kg
+  - 車輛 V-7714: 385.2 kg
+
+[Scope 2 間接排放]
+電力使用: 850.2 kgCO2e
+
+[數據完整性]
+資料來源: IoT 車機直連
+雜湊值 (Hash): ${AUDIT_TRAIL[0].hash}
+                    `.trim();
+                } else if (report.type === 'SROI' || report.title.includes('人權')) {
+                    content = `
+==================================================
+Eco-Logic | SROI 與 人權盡職調查報告 (模擬)
+==================================================
+產生日期: ${new Date().toLocaleString()}
+
+[外部人權風險快訊]
+事件：${NEWS_RISKS[0].title}
+來源：${NEWS_RISKS[0].source}
+風險等級：${NEWS_RISKS[0].risk_level}
+AI 建議：建議針對外包物流商進行勞動條件稽核。
+
+[社會投資報酬率 (SROI)]
+投入：NT$ 1,200,000 (安駕培訓系統)
+產出：事故率降低 15%，減少社會成本 NT$ 4,224,000
+SROI 比率：3.52
+
+[工時合規分析]
+全體合規率：98.5%
+異常事件：V-9903 (疲勞駕駛風險高)
+                    `.trim();
+                } else if (report.type === 'DriverDetail') {
+                    content = `
+==================================================
+Eco-Logic | 單一車輛環境數據報告
+==================================================
+車輛編號: ${selectedVehicle.id}
+駕駛姓名: ${selectedVehicle.driver}
+位置: ${selectedVehicle.location}
+日期: ${new Date().toLocaleString()}
+
+[行駛數據]
+總引擎運轉時數: ${selectedVehicle.engine_hours} hr
+怠速時數: ${selectedVehicle.idle_hours} hr (佔比 ${(selectedVehicle.idle_hours/selectedVehicle.engine_hours*100).toFixed(1)}%)
+平均油耗評分: ${selectedVehicle.fuel_score} / 100
+
+[碳排放數據]
+即時排放量: ${selectedVehicle.carbon} kgCO2e/hr
+今日累計排放: ${(selectedVehicle.carbon * 8).toFixed(1)} kgCO2e
+
+建議：該車輛怠速比例若過高，建議檢查引擎或調整路線規劃。
+                    `.trim();
+                } else if (report.type === 'SocialDetail') {
+                    content = `
+==================================================
+Eco-Logic | 駕駛員社會績效分析報告 (S-Quant)
+==================================================
+車輛編號: ${selectedVehicle.id}
+駕駛姓名: ${selectedVehicle.driver}
+分析日期: ${new Date().toLocaleString()}
+
+[AI 社會評分]
+綜合得分: ${selectedVehicle.social_score} / 100
+評級: ${selectedVehicle.social_score >= 80 ? '優良' : selectedVehicle.social_score >= 60 ? '普通' : '高風險'}
+
+[關鍵指標]
+1. 疲勞風險: ${selectedVehicle.fatigue_risk}
+2. 工時合規性: ${selectedVehicle.compliance}%
+3. 情緒穩定度: 穩定 (基於急煞/急轉彎數據推估)
+
+建議：${selectedVehicle.fatigue_risk === 'High' ? '該駕駛疲勞風險偏高，請強制安排休息或進行面談。' : '表現良好，可作為優良駕駛範本。'}
+                    `.trim();
+                } else {
+                    content = `[RAW DATA LOG] - RESTRICTED ACCESS\nTimestamp: ${new Date().toISOString()}\nUser: Auditor_Read_Only\n...\n`;
+                }
+
                 const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -202,18 +376,157 @@
                 URL.revokeObjectURL(url);
             };
 
+            // 車輛詳情 Modal (環境)
+            const DriverDetailModal = () => {
+                if (!detailModalOpen) return null;
+                return (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-fade-in">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                        <Truck className="text-emerald-600"/> {selectedVehicle.id} 環境數據監控
+                                    </h3>
+                                    <p className="text-sm text-slate-500 mt-1">駕駛：{selectedVehicle.driver} | 位置：{selectedVehicle.location}</p>
+                                </div>
+                                <button onClick={() => setDetailModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors"><X size={20}/></button>
+                            </div>
+                            
+                            <div className="p-6 overflow-y-auto space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                                        <p className="text-xs text-emerald-600 font-bold uppercase mb-1">Eco-Score</p>
+                                        <p className="text-3xl font-bold text-emerald-700">{selectedVehicle.fuel_score}</p>
+                                        <p className="text-xs text-emerald-600 mt-1">優於車隊平均 5%</p>
+                                    </div>
+                                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                        <p className="text-xs text-slate-500 font-bold uppercase mb-1">Carbon Emission</p>
+                                        <p className="text-3xl font-bold text-slate-700">{selectedVehicle.carbon} <span className="text-sm font-normal">kg/hr</span></p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 className="font-bold text-slate-700 mb-3 flex items-center gap-2"><Activity size={16}/> 今日行程日誌 (Simulated Log)</h4>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-4 text-sm p-3 bg-white border border-slate-100 rounded-lg shadow-sm">
+                                            <span className="font-mono text-slate-400 text-xs">08:30:00</span>
+                                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded font-bold">START</span>
+                                            <span className="text-slate-600">引擎啟動，位置：內湖總部</span>
+                                        </div>
+                                        {/* ... logs ... */}
+                                        <div className="flex items-center gap-4 text-sm p-3 bg-white border border-slate-100 rounded-lg shadow-sm">
+                                            <span className="font-mono text-slate-400 text-xs">Now</span>
+                                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded font-bold">LIVE</span>
+                                            <span className="text-slate-600">即時數據上傳中... Hash: 0x8a...9c</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                                <button onClick={() => setDetailModalOpen(false)} className="px-4 py-2 text-slate-500 hover:bg-slate-200 rounded-lg text-sm font-medium">關閉</button>
+                                <button 
+                                    onClick={() => handleDownload({ title: `Driver_Env_Report_${selectedVehicle.id}`, type: 'DriverDetail' })} 
+                                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm"
+                                >
+                                    <Download size={16}/> 下載該司機個別報告
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            // 駕駛社會價值詳情 Modal (新增)
+            const SocialDetailModal = () => {
+                if (!socialModalOpen) return null;
+                return (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-fade-in">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                        <User className="text-sky-600"/> S-Quant 駕駛個人分析報告
+                                    </h3>
+                                    <p className="text-sm text-slate-500 mt-1">分析對象：{selectedVehicle.driver} ({selectedVehicle.id})</p>
+                                </div>
+                                <button onClick={() => setSocialModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors"><X size={20}/></button>
+                            </div>
+                            
+                            <div className="p-6 overflow-y-auto space-y-6">
+                                <div className="mb-2 flex items-center gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                    <div className="w-16 h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-2xl font-bold text-slate-600 shadow-sm">
+                                        {selectedVehicle.driver[0]}
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-lg text-slate-800">{selectedVehicle.driver}</h4>
+                                        <p className="text-sm text-slate-500">車輛編號：{selectedVehicle.id}</p>
+                                    </div>
+                                    <div className="ml-auto text-right">
+                                        <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">綜合社會評分</p>
+                                        <div className="flex items-baseline justify-end gap-1">
+                                            <span className={`text-3xl font-bold ${selectedVehicle.social_score >= 80 ? 'text-emerald-600' : selectedVehicle.social_score >= 60 ? 'text-amber-500' : 'text-rose-500'}`}>{selectedVehicle.social_score}</span>
+                                            <span className="text-sm text-slate-400">/100</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="p-5 rounded-xl border border-slate-100 hover:border-slate-300 transition-colors">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <span className="font-bold text-slate-700 flex items-center gap-2"><History size={18} className="text-slate-400"/> 工時合規性</span>
+                                            <span className={`font-bold ${selectedVehicle.compliance < 90 ? 'text-rose-500' : 'text-emerald-600'}`}>{selectedVehicle.compliance}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 rounded-full h-2 mb-3">
+                                            <div className={`${selectedVehicle.compliance < 90 ? 'bg-rose-500' : 'bg-emerald-500'} h-2 rounded-full`} style={{ width: `${selectedVehicle.compliance}%` }}></div>
+                                        </div>
+                                        <p className="text-sm text-slate-600 leading-relaxed">
+                                            {selectedVehicle.compliance < 90 
+                                                ? '警告：本週連續駕駛時數已接近法規上限，建議調整排班。' 
+                                                : 'AI 分析顯示：根據打卡與 GPS 紀錄交叉比對，本週休息時間符合勞基法規範，無超時風險。'}
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="p-5 rounded-xl border border-slate-100 hover:border-slate-300 transition-colors">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <span className="font-bold text-slate-700 flex items-center gap-2"><Activity size={18} className="text-slate-400"/> 心理壓力與疲勞指數</span>
+                                            <span className={`font-bold px-3 py-1 rounded-full text-xs ${selectedVehicle.fatigue_risk === 'High' ? 'bg-rose-100 text-rose-600' : selectedVehicle.fatigue_risk === 'Medium' ? 'bg-amber-100 text-amber-600' : 'bg-sky-100 text-sky-600'}`}>{selectedVehicle.fatigue_risk} Risk</span>
+                                        </div>
+                                        <p className="text-sm text-slate-600 leading-relaxed">
+                                            {selectedVehicle.fatigue_risk === 'High'
+                                                ? '偵測到頻繁急煞與不穩定轉向，AI 判定駕駛可能處於高疲勞或高壓力狀態，請立即介入關懷。'
+                                                : 'G-Sensor 數據分析：急煞次數與轉彎平穩度處於正常範圍，判定駕駛情緒穩定。'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                                <button onClick={() => setSocialModalOpen(false)} className="px-4 py-2 text-slate-500 hover:bg-slate-200 rounded-lg text-sm font-medium">關閉</button>
+                                <button 
+                                    onClick={() => handleDownload({ title: `Driver_Social_Report_${selectedVehicle.id}`, type: 'SocialDetail' })} 
+                                    className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm"
+                                >
+                                    <Download size={16}/> 下載社會績效報告
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
             const renderContent = () => {
                 switch(activeTab) {
                     case 'dashboard':
                         return (
                             <div className="animate-fade-in space-y-6">
-                                {/* KPI 卡片區：色調統一化，用 Icon 顏色區分 */}
+                                {/* KPI 卡片區 */}
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                     <KpiCard 
                                         title="總碳排放量 (Scope 1)" 
                                         value="1,240 kgCO2e" 
                                         trend="5.2% 較上月" 
-                                        trendUp={false} // 下降是好事，但樣式上綠色代表好
+                                        trendUp={false} 
                                         icon={<Leaf />} 
                                         iconBgClass="bg-emerald-50"
                                         iconColorClass="text-emerald-600"
@@ -234,22 +547,22 @@
                                         trend="0.12 較上月" 
                                         trendUp={true} 
                                         icon={<TrendingUp />} 
-                                        iconBgClass="bg-indigo-50" // 改為專業的靛青色
+                                        iconBgClass="bg-indigo-50" 
                                         iconColorClass="text-indigo-600"
                                     />
                                     <KpiCard 
                                         title="高風險駕駛行為" 
                                         value="12 件" 
                                         trend="3 件 較上月" 
-                                        trendUp={false} // 減少是好事
+                                        trendUp={false} 
                                         icon={<AlertTriangle />} 
-                                        iconBgClass="bg-amber-50" // 警示色保留，但柔和化
+                                        iconBgClass="bg-amber-50" 
                                         iconColorClass="text-amber-500"
                                     />
                                 </div>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* 近期系統警示：改為簡潔列表 */}
+                                    {/* 近期系統警示 */}
                                     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                                         <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
                                             <Activity size={18} className="text-slate-500" /> 近期系統警示
@@ -272,7 +585,7 @@
                                         </div>
                                     </div>
 
-                                    {/* 系統合規狀態：移除漸層，改為專業卡片 */}
+                                    {/* 系統合規狀態 */}
                                     <div className="bg-white p-6 rounded-xl border border-slate-200 flex flex-col justify-center items-center text-center shadow-sm">
                                         <div className="p-4 bg-slate-50 rounded-full mb-3">
                                             <ShieldCheck size={40} className="text-emerald-600" />
@@ -298,10 +611,15 @@
                                         <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-500"></div> 異常</span>
                                     </div>
                                 </div>
+                                <p className="text-sm text-slate-500 -mt-4 mb-2">點擊下方車輛卡片可查看詳細監控數據與下載個別報告。</p>
                                 
                                 <div className="grid grid-cols-1 gap-4">
                                     {FLEET_DATA.map((vehicle) => (
-                                        <div key={vehicle.id} onClick={() => setSelectedVehicle(vehicle)} className={`p-5 rounded-xl border bg-white cursor-pointer transition-all hover:shadow-md flex flex-col md:flex-row gap-6 items-center ${selectedVehicle.id === vehicle.id ? 'ring-2 ring-emerald-500 border-transparent' : 'border-slate-200'}`}>
+                                        <div 
+                                            key={vehicle.id} 
+                                            onClick={() => { setSelectedVehicle(vehicle); setDetailModalOpen(true); }} 
+                                            className={`p-5 rounded-xl border bg-white cursor-pointer transition-all hover:shadow-md flex flex-col md:flex-row gap-6 items-center ${selectedVehicle.id === vehicle.id ? 'ring-2 ring-emerald-500 border-transparent' : 'border-slate-200'}`}
+                                        >
                                             <div className="flex-1 w-full">
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex items-center gap-4">
@@ -343,56 +661,65 @@
                     case 'social':
                         return (
                             <div className="animate-fade-in grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {/* 左側：詳細分析面板 */}
-                                <div className="md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 p-6 opacity-5">
-                                        <BrainCircuit size={200} className="text-slate-900" />
-                                    </div>
-                                    <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2 text-xl">
-                                        <BrainCircuit className="text-sky-600" size={24} />
-                                        S-Quant AI 駕駛社會價值分析
-                                    </h3>
-                                    
-                                    <div className="mb-8 flex items-center gap-6 p-6 bg-slate-50 rounded-xl border border-slate-100">
-                                        <div className="w-16 h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-2xl font-bold text-slate-600 shadow-sm">
-                                            {selectedVehicle.driver[0]}
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-lg text-slate-800">{selectedVehicle.driver}</h4>
-                                            <p className="text-sm text-slate-500">車輛編號：{selectedVehicle.id}</p>
-                                        </div>
-                                        <div className="ml-auto text-right">
-                                            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">綜合社會評分</p>
-                                            <div className="flex items-baseline justify-end gap-1">
-                                                <span className="text-3xl font-bold text-emerald-600">85</span>
-                                                <span className="text-sm text-slate-400">/100</span>
-                                            </div>
+                                {/* 左側：改為駕駛列表 (與 Environment 類似，但顯示社會指標) */}
+                                <div className="md:col-span-2 space-y-6">
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="text-xl font-bold text-slate-700">駕駛社會績效列表</h3>
+                                        <div className="flex gap-2 text-sm text-slate-500">
+                                            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> 優良</span>
+                                            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-500"></div> 普通</span>
+                                            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-rose-500"></div> 高風險</span>
                                         </div>
                                     </div>
+                                    <p className="text-sm text-slate-500 -mt-4 mb-2">點擊下方駕駛卡片可查看 S-Quant 個人社會價值分析。</p>
 
-                                    <div className="space-y-4">
-                                        <div className="p-5 rounded-xl border border-slate-100 hover:border-slate-300 transition-colors">
-                                            <div className="flex justify-between items-center mb-3">
-                                                <span className="font-bold text-slate-700 flex items-center gap-2"><History size={18} className="text-slate-400"/> 工時合規性</span>
-                                                <span className={`font-bold ${selectedVehicle.compliance < 90 ? 'text-rose-500' : 'text-emerald-600'}`}>{selectedVehicle.compliance}%</span>
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {FLEET_DATA.map((vehicle) => (
+                                            <div 
+                                                key={vehicle.id} 
+                                                onClick={() => { setSelectedVehicle(vehicle); setSocialModalOpen(true); }} 
+                                                className={`p-5 rounded-xl border bg-white cursor-pointer transition-all hover:shadow-md flex flex-col md:flex-row gap-6 items-center ${selectedVehicle.id === vehicle.id ? 'ring-2 ring-sky-500 border-transparent' : 'border-slate-200'}`}
+                                            >
+                                                <div className="flex-1 w-full">
+                                                    <div className="flex justify-between items-start">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-lg font-bold text-slate-600">
+                                                                {vehicle.driver[0]}
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-bold text-lg text-slate-800">{vehicle.driver}</div>
+                                                                <div className="text-xs text-slate-500 flex items-center gap-2 mt-1">
+                                                                    <span className="bg-slate-100 px-2 py-0.5 rounded">{vehicle.id}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${vehicle.fatigue_risk === 'High' ? 'bg-rose-50 text-rose-700 border-rose-200' : vehicle.fatigue_risk === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
+                                                            疲勞風險: {vehicle.fatigue_risk}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex-1 w-full grid grid-cols-2 gap-8 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-8">
+                                                    <div>
+                                                        <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">社會評分</p>
+                                                        <p className={`font-bold text-lg ${vehicle.social_score >= 80 ? 'text-emerald-600' : vehicle.social_score >= 60 ? 'text-amber-500' : 'text-rose-500'}`}>{vehicle.social_score} <span className="text-xs font-normal text-slate-500">/ 100</span></p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">合規率</p>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className={`font-bold text-lg ${vehicle.compliance < 90 ? 'text-rose-500' : 'text-emerald-600'}`}>{vehicle.compliance}%</span>
+                                                            <div className="w-24 bg-slate-100 rounded-full h-2">
+                                                                <div className={`h-2 rounded-full ${vehicle.compliance < 90 ? 'bg-rose-500' : 'bg-emerald-500'}`} style={{ width: `${vehicle.compliance}%` }}></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="w-full bg-slate-100 rounded-full h-2 mb-3">
-                                                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${selectedVehicle.compliance}%` }}></div>
-                                            </div>
-                                            <p className="text-sm text-slate-600 leading-relaxed">AI 分析顯示：根據打卡與 GPS 紀錄交叉比對，本週休息時間符合勞基法規範，無超時風險。</p>
-                                        </div>
-                                        
-                                        <div className="p-5 rounded-xl border border-slate-100 hover:border-slate-300 transition-colors">
-                                            <div className="flex justify-between items-center mb-3">
-                                                <span className="font-bold text-slate-700 flex items-center gap-2"><Activity size={18} className="text-slate-400"/> 心理壓力與疲勞指數</span>
-                                                <span className={`font-bold px-3 py-1 rounded-full text-xs ${selectedVehicle.fatigue_risk === 'High' ? 'bg-rose-100 text-rose-600' : 'bg-sky-100 text-sky-600'}`}>{selectedVehicle.fatigue_risk} Risk</span>
-                                            </div>
-                                            <p className="text-sm text-slate-600 leading-relaxed">G-Sensor 數據分析：急煞次數與轉彎平穩度處於正常範圍，判定駕駛情緒穩定。</p>
-                                        </div>
+                                        ))}
                                     </div>
                                 </div>
 
-                                {/* 右側：外部輿情風險 */}
+                                {/* 右側：外部輿情風險 (維持不變) */}
                                 <div className="space-y-6">
                                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                                         <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2">
@@ -413,7 +740,10 @@
                                                 </div>
                                             ))}
                                         </div>
-                                        <button className="w-full mt-6 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded transition-colors border border-transparent hover:border-slate-200">
+                                        <button 
+                                            onClick={() => handleDownload({ title: '外部人權風險與輿情分析報告', type: 'SROI' })}
+                                            className="w-full mt-6 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded transition-colors border border-transparent hover:border-slate-200"
+                                        >
                                             查看完整報告 &rarr;
                                         </button>
                                     </div>
@@ -436,7 +766,7 @@
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         {AUDIT_REPORTS.map(report => (
-                                            <div key={report.id} onClick={() => handleDownload(report)} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:-translate-y-1">
+                                            <div key={report.id} onClick={() => handleDownload({ title: report.title, type: report.type.includes('ISO') ? 'ISO' : 'SROI' })} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:-translate-y-1">
                                                 <div className="flex justify-between items-start mb-4">
                                                     <span className="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-md font-bold tracking-wide">{report.type}</span>
                                                     <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
@@ -583,6 +913,10 @@
                         {renderContent()}
                     </div>
                 </main>
+
+                <DriverDetailModal />
+                <SocialDetailModal />
+                <SystemAssistant />
                 </div>
             );
         };
