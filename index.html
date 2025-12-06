@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Combogic x S-Quant 整合平台</title>
+    <title>Eco-Logic x S-Quant 整合平台</title>
     
     <!-- 1. 載入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,16 +21,24 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* 頁面切換動畫 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- 內嵌圖標庫 (解決 CDN 載入失敗問題) ---
-        // 這裡直接定義我們需要的 SVG 圖標元件
+        // --- 內嵌圖標庫 ---
         const IconBase = ({ children, size = 24, className = "", ...props }) => (
             <svg 
                 xmlns="http://www.w3.org/2000/svg" 
@@ -88,6 +96,7 @@
         const NEWS_RISKS = [
             { id: 1, source: 'News API', title: '物流業工時新制上路，部分業者違規', risk_level: 'High', category: '勞動權益', date: '2025-10-24' },
             { id: 2, source: 'Internal Report', title: '龜山轉運站發生小型工安意外', risk_level: 'Medium', category: '職場安全', date: '2025-10-23' },
+            { id: 3, source: 'Social Media', title: '網路論壇討論物流司機過勞問題', risk_level: 'Low', category: '品牌聲譽', date: '2025-10-22' },
         ];
 
         const AUDIT_REPORTS = [
@@ -105,7 +114,10 @@
         // --- 元件 ---
 
         const NavItem = ({ icon, label, active, onClick, highlight, colorClass }) => {
-            const baseClass = highlight && active ? colorClass : (active ? 'bg-slate-800 border-green-500 text-white' : 'border-transparent text-slate-400 hover:bg-slate-800 hover:text-white');
+            // 統一導航樣式，移除過多的色彩裝飾，保持專業灰階與主色
+            const baseClass = highlight && active 
+                ? 'bg-emerald-900/40 border-emerald-400 text-emerald-400' 
+                : (active ? 'bg-slate-800 border-emerald-500 text-white' : 'border-transparent text-slate-400 hover:bg-slate-800 hover:text-white');
             
             return (
             <button 
@@ -118,29 +130,32 @@
             );
         };
 
-        const KpiCard = ({ title, value, trend, trendUp, icon, color, subtitle }) => (
-            <div className={`bg-white rounded-xl shadow-sm p-6 border border-gray-100 ${color} hover:shadow-md transition-shadow`}>
+        // 優化後的 KpiCard：移除左側粗邊框，改用 Icon 背景色來區分，整體更乾淨
+        const KpiCard = ({ title, value, trend, trendUp, icon, iconBgClass, iconColorClass, subtitle }) => (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-gray-50 rounded-lg shadow-sm">{icon}</div>
-                {trend && (
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${trendUp ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {trend}
-                    </span>
-                )}
+                    <div className={`p-3 rounded-lg ${iconBgClass} ${iconColorClass}`}>
+                        {icon}
+                    </div>
+                    {trend && (
+                        <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${trendUp ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                            {trendUp ? '↑' : '↓'} {trend}
+                        </div>
+                    )}
                 </div>
                 <div>
-                <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold">{title}</p>
-                <h3 className="text-2xl font-bold text-gray-800 mt-1">{value}</h3>
-                {subtitle && <p className="text-xs text-blue-500 mt-1 flex items-center gap-1"><BrainCircuit size={10}/> {subtitle}</p>}
+                    <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold">{title}</p>
+                    <h3 className="text-2xl font-bold text-slate-800 mt-1">{value}</h3>
+                    {subtitle && <p className="text-xs text-slate-400 mt-2 flex items-center gap-1"><BrainCircuit size={12}/> {subtitle}</p>}
                 </div>
             </div>
         );
 
         const StatusBadge = ({ status }) => {
             const styles = {
-                moving: 'bg-green-100 text-green-700 border-green-200',
-                idle: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                offline: 'bg-gray-100 text-gray-600 border-gray-200'
+                moving: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                idle: 'bg-amber-50 text-amber-700 border-amber-200',
+                offline: 'bg-slate-100 text-slate-600 border-slate-200'
             };
             const labels = {
                 moving: '行駛中',
@@ -157,7 +172,7 @@
         // --- 主程式 ---
 
         const App = () => {
-            const [activeTab, setActiveTab] = useState('dashboard'); // 預設改回 Dashboard 方便第一眼查看
+            const [activeTab, setActiveTab] = useState('dashboard');
             const [selectedVehicle, setSelectedVehicle] = useState(FLEET_DATA[1]);
             const [isAiScanning, setIsAiScanning] = useState(false);
             const [socialScore, setSocialScore] = useState(78);
@@ -171,272 +186,401 @@
                 }, 2000);
             };
 
+            const handleDownload = (report) => {
+                let content = "";
+                let filename = `${report.title}.txt`;
+                // ... (下載邏輯保持不變)
+                content = `[Simulated Report: ${report.title}]\nDate: ${new Date().toISOString()}`;
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+
+            const renderContent = () => {
+                switch(activeTab) {
+                    case 'dashboard':
+                        return (
+                            <div className="animate-fade-in space-y-6">
+                                {/* KPI 卡片區：色調統一化，用 Icon 顏色區分 */}
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                    <KpiCard 
+                                        title="總碳排放量 (Scope 1)" 
+                                        value="1,240 kgCO2e" 
+                                        trend="5.2% 較上月" 
+                                        trendUp={false} // 下降是好事，但樣式上綠色代表好
+                                        icon={<Leaf />} 
+                                        iconBgClass="bg-emerald-50"
+                                        iconColorClass="text-emerald-600"
+                                    />
+                                    <KpiCard 
+                                        title="社會與人權風險分" 
+                                        value={`${socialScore}/100`} 
+                                        trend="2.4分 較上月" 
+                                        trendUp={true} 
+                                        icon={<ShieldCheck />} 
+                                        iconBgClass="bg-sky-50"
+                                        iconColorClass="text-sky-600"
+                                        subtitle="S-Quant AI 評估"
+                                    />
+                                     <KpiCard 
+                                        title="SROI 社會投資報酬" 
+                                        value="1 : 3.52" 
+                                        trend="0.12 較上月" 
+                                        trendUp={true} 
+                                        icon={<TrendingUp />} 
+                                        iconBgClass="bg-indigo-50" // 改為專業的靛青色
+                                        iconColorClass="text-indigo-600"
+                                    />
+                                    <KpiCard 
+                                        title="高風險駕駛行為" 
+                                        value="12 件" 
+                                        trend="3 件 較上月" 
+                                        trendUp={false} // 減少是好事
+                                        icon={<AlertTriangle />} 
+                                        iconBgClass="bg-amber-50" // 警示色保留，但柔和化
+                                        iconColorClass="text-amber-500"
+                                    />
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* 近期系統警示：改為簡潔列表 */}
+                                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                                        <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                                            <Activity size={18} className="text-slate-500" /> 近期系統警示
+                                        </h3>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between p-3 border-l-4 border-rose-500 bg-white shadow-sm rounded-r-lg">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-rose-500"><AlertTriangle size={16}/></span>
+                                                    <span className="text-sm font-medium text-slate-700">V-9903 觸發疲勞駕駛警示 (連續 4 小時)</span>
+                                                </div>
+                                                <span className="text-xs text-slate-400">14:30</span>
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 border-l-4 border-amber-400 bg-white shadow-sm rounded-r-lg">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-amber-500"><AlertTriangle size={16}/></span>
+                                                    <span className="text-sm font-medium text-slate-700">V-8821 怠速時間過長 (>15min)</span>
+                                                </div>
+                                                <span className="text-xs text-slate-400">11:15</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 系統合規狀態：移除漸層，改為專業卡片 */}
+                                    <div className="bg-white p-6 rounded-xl border border-slate-200 flex flex-col justify-center items-center text-center shadow-sm">
+                                        <div className="p-4 bg-slate-50 rounded-full mb-3">
+                                            <ShieldCheck size={40} className="text-emerald-600" />
+                                        </div>
+                                        <h3 className="font-bold text-slate-800 text-lg">系統合規狀態</h3>
+                                        <p className="text-sm text-slate-500 mt-2 max-w-xs">目前碳排數據 (ISO 14064) 與勞動合規數據 (GRI 403) 皆正常運作中。</p>
+                                        <div className="mt-6 flex gap-3">
+                                            <span className="px-3 py-1 bg-white border border-emerald-200 text-emerald-700 rounded-full text-xs font-bold shadow-sm">ISO 14064 Ready</span>
+                                            <span className="px-3 py-1 bg-white border border-sky-200 text-sky-700 rounded-full text-xs font-bold shadow-sm">GRI Standards</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+
+                    case 'environment':
+                        return (
+                            <div className="animate-fade-in space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-xl font-bold text-slate-700">Carbon-V 車隊環境數據</h3>
+                                    <div className="flex gap-2 text-sm text-slate-500">
+                                        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> 正常</span>
+                                        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-500"></div> 異常</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 gap-4">
+                                    {FLEET_DATA.map((vehicle) => (
+                                        <div key={vehicle.id} onClick={() => setSelectedVehicle(vehicle)} className={`p-5 rounded-xl border bg-white cursor-pointer transition-all hover:shadow-md flex flex-col md:flex-row gap-6 items-center ${selectedVehicle.id === vehicle.id ? 'ring-2 ring-emerald-500 border-transparent' : 'border-slate-200'}`}>
+                                            <div className="flex-1 w-full">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="p-3 bg-slate-50 rounded-lg text-slate-500"><Truck size={24} /></div>
+                                                        <div>
+                                                            <div className="font-bold text-lg text-slate-800">{vehicle.id}</div>
+                                                            <div className="text-xs text-slate-500 flex items-center gap-2 mt-1">
+                                                                <span className="flex items-center gap-1"><Users size={12}/> {vehicle.driver}</span>
+                                                                <span className="text-slate-300">|</span> 
+                                                                <span className="flex items-center gap-1"><MapPin size={12}/> {vehicle.location}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <StatusBadge status={vehicle.status} />
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex-1 w-full grid grid-cols-2 gap-8 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-8">
+                                                <div>
+                                                    <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">即時碳排放</p>
+                                                    <p className="font-bold text-slate-800 text-lg">{vehicle.carbon} <span className="text-xs font-normal text-slate-500">kg/hr</span></p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">油耗評分</p>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className={`font-bold text-lg ${vehicle.fuel_score < 70 ? 'text-rose-500' : 'text-emerald-600'}`}>{vehicle.fuel_score}</span>
+                                                        <div className="w-24 bg-slate-100 rounded-full h-2">
+                                                            <div className={`h-2 rounded-full ${vehicle.fuel_score < 70 ? 'bg-rose-500' : 'bg-emerald-500'}`} style={{ width: `${vehicle.fuel_score}%` }}></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+
+                    case 'social':
+                        return (
+                            <div className="animate-fade-in grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {/* 左側：詳細分析面板 */}
+                                <div className="md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-6 opacity-5">
+                                        <BrainCircuit size={200} className="text-slate-900" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2 text-xl">
+                                        <BrainCircuit className="text-sky-600" size={24} />
+                                        S-Quant AI 駕駛社會價值分析
+                                    </h3>
+                                    
+                                    <div className="mb-8 flex items-center gap-6 p-6 bg-slate-50 rounded-xl border border-slate-100">
+                                        <div className="w-16 h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-2xl font-bold text-slate-600 shadow-sm">
+                                            {selectedVehicle.driver[0]}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-lg text-slate-800">{selectedVehicle.driver}</h4>
+                                            <p className="text-sm text-slate-500">車輛編號：{selectedVehicle.id}</p>
+                                        </div>
+                                        <div className="ml-auto text-right">
+                                            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">綜合社會評分</p>
+                                            <div className="flex items-baseline justify-end gap-1">
+                                                <span className="text-3xl font-bold text-emerald-600">85</span>
+                                                <span className="text-sm text-slate-400">/100</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="p-5 rounded-xl border border-slate-100 hover:border-slate-300 transition-colors">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <span className="font-bold text-slate-700 flex items-center gap-2"><History size={18} className="text-slate-400"/> 工時合規性</span>
+                                                <span className={`font-bold ${selectedVehicle.compliance < 90 ? 'text-rose-500' : 'text-emerald-600'}`}>{selectedVehicle.compliance}%</span>
+                                            </div>
+                                            <div className="w-full bg-slate-100 rounded-full h-2 mb-3">
+                                                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${selectedVehicle.compliance}%` }}></div>
+                                            </div>
+                                            <p className="text-sm text-slate-600 leading-relaxed">AI 分析顯示：根據打卡與 GPS 紀錄交叉比對，本週休息時間符合勞基法規範，無超時風險。</p>
+                                        </div>
+                                        
+                                        <div className="p-5 rounded-xl border border-slate-100 hover:border-slate-300 transition-colors">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <span className="font-bold text-slate-700 flex items-center gap-2"><Activity size={18} className="text-slate-400"/> 心理壓力與疲勞指數</span>
+                                                <span className={`font-bold px-3 py-1 rounded-full text-xs ${selectedVehicle.fatigue_risk === 'High' ? 'bg-rose-100 text-rose-600' : 'bg-sky-100 text-sky-600'}`}>{selectedVehicle.fatigue_risk} Risk</span>
+                                            </div>
+                                            <p className="text-sm text-slate-600 leading-relaxed">G-Sensor 數據分析：急煞次數與轉彎平穩度處於正常範圍，判定駕駛情緒穩定。</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 右側：外部輿情風險 */}
+                                <div className="space-y-6">
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                        <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                            <Newspaper className="text-slate-500" size={20} />
+                                            外部人權風險快訊
+                                        </h3>
+                                        <div className="space-y-6">
+                                            {NEWS_RISKS.map(news => (
+                                                <div key={news.id} className="relative pl-4 border-l-2 border-slate-100 last:border-0">
+                                                    <div className={`absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full border-2 border-white ${news.risk_level === 'High' ? 'bg-rose-500' : news.risk_level === 'Medium' ? 'bg-amber-400' : 'bg-emerald-400'}`}></div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-slate-800 leading-snug hover:text-sky-600 cursor-pointer transition-colors mb-1">{news.title}</h4>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full font-medium">{news.category}</span>
+                                                            <span className="text-[10px] text-slate-400">{news.date}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button className="w-full mt-6 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded transition-colors border border-transparent hover:border-slate-200">
+                                            查看完整報告 &rarr;
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+
+                    case 'reports':
+                        return (
+                            <div className="animate-fade-in space-y-8">
+                                <section>
+                                    <div className="flex justify-between items-end mb-6">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                                <FileText className="text-sky-600" /> 合規報告生成
+                                            </h3>
+                                            <p className="text-slate-500 text-sm mt-1">針對銀行 SLL 貸款與第三方查證單位所需的標準格式報告。</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        {AUDIT_REPORTS.map(report => (
+                                            <div key={report.id} onClick={() => handleDownload(report)} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:-translate-y-1">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <span className="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-md font-bold tracking-wide">{report.type}</span>
+                                                    <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                                        <Download size={16} />
+                                                    </div>
+                                                </div>
+                                                <h4 className="font-bold text-slate-800 mb-2 group-hover:text-sky-600 transition-colors">{report.title}</h4>
+                                                <div className="flex items-center gap-2 text-xs text-slate-400">
+                                                    <span>{report.date}</span>
+                                                    <span>•</span>
+                                                    <span>{report.size}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                                        <div>
+                                            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                                <History className="text-slate-500" /> 數據溯源與稽核軌跡
+                                            </h3>
+                                            <p className="text-xs text-slate-500 mt-1">
+                                                符合 ISAE 3000 確信標準。紀錄所有數據的產生、AI 運算與人為修正歷程。
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm text-left">
+                                            <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                                                <tr>
+                                                    <th className="px-6 py-4">Timestamp</th>
+                                                    <th className="px-6 py-4">Actor</th>
+                                                    <th className="px-6 py-4">Action</th>
+                                                    <th className="px-6 py-4">Details</th>
+                                                    <th className="px-6 py-4">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {AUDIT_TRAIL.map(log => (
+                                                    <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                                                        <td className="px-6 py-4 font-mono text-slate-500 text-xs">{log.timestamp}</td>
+                                                        <td className="px-6 py-4">
+                                                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${log.user.includes('System') || log.user.includes('AI') ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}`}>
+                                                                {log.user}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4 font-medium text-slate-800">{log.action}</td>
+                                                        <td className="px-6 py-4 text-slate-600 max-w-xs truncate" title={log.details}>{log.details}</td>
+                                                        <td className="px-6 py-4">
+                                                            <span className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full w-fit text-xs font-medium border border-emerald-100">
+                                                                <CheckCircle2 size={12} /> Verified
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            </div>
+                        );
+                    
+                    default:
+                        return null;
+                }
+            };
+
+            const getPageTitle = () => {
+                switch(activeTab) {
+                    case 'dashboard': return 'ESG 綜合效益儀表板';
+                    case 'environment': return '環境數據監控 (Environment)';
+                    case 'social': return '社會價值評估 (Social)';
+                    case 'reports': return '查證與報告中心';
+                    default: return '';
+                }
+            };
+
             return (
-                <div className="flex h-screen bg-gray-50 font-sans text-gray-800 overflow-hidden">
+                <div className="flex h-screen bg-slate-50 font-sans text-slate-800 overflow-hidden">
                 {/* Sidebar */}
-                <aside className="w-64 bg-slate-900 text-white flex flex-col shadow-xl flex-shrink-0 z-20">
-                    <div className="p-6 border-b border-slate-700">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center font-bold text-xl text-white">C</div>
+                <aside className="w-64 bg-slate-900 text-white flex flex-col shadow-2xl flex-shrink-0 z-20">
+                    <div className="p-6 border-b border-slate-800">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center font-bold text-2xl text-white shadow-lg shadow-emerald-900/50">E</div>
                         <div>
-                        <h1 className="font-bold text-lg tracking-wide">COMBOGIC</h1>
-                        <p className="text-xs text-slate-400">CHAP-V + S-Quant</p>
+                        <h1 className="font-bold text-lg tracking-wide text-white">ECO-LOGIC</h1>
+                        <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Carbon-V + S-Quant</p>
                         </div>
                     </div>
                     </div>
 
-                    <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    <div className="text-xs font-semibold text-slate-500 uppercase mb-2 px-2">Overview</div>
-                    <NavItem icon={<LayoutDashboard size={20} />} label="總覽儀表板" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+                    <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-3 mt-2">Core Modules</div>
+                    <NavItem icon={<LayoutDashboard size={18} />} label="總覽儀表板" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
                     
-                    <div className="text-xs font-semibold text-slate-500 uppercase mt-6 mb-2 px-2">CHAP-V (Environment)</div>
-                    <NavItem icon={<Truck size={20} />} label="車隊即時監控" active={activeTab === 'fleet'} onClick={() => setActiveTab('fleet')} />
+                    <NavItem icon={<Truck size={18} />} label="環境數據 (Env)" active={activeTab === 'environment'} onClick={() => setActiveTab('environment')} />
                     
-                    <div className="text-xs font-semibold text-emerald-400 uppercase mt-6 mb-2 px-2 flex items-center gap-1">
-                        <BrainCircuit size={12} /> S-Quant (Social AI)
-                    </div>
-                    <NavItem icon={<Users size={20} />} label="人權風險評估" active={activeTab === 'human_rights'} onClick={() => setActiveTab('human_rights')} />
+                    <NavItem icon={<Users size={18} />} label="社會價值 (Soc)" active={activeTab === 'social'} onClick={() => setActiveTab('social')} />
                     
-                    {/* Verification */}
-                    <div className="text-xs font-semibold text-blue-400 uppercase mt-6 mb-2 px-2 flex items-center gap-1">
-                        <ShieldCheck size={12} /> Verification
-                    </div>
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-8 mb-3 px-3">Compliance</div>
                     <NavItem 
-                        icon={<FileText size={20} />} 
+                        icon={<FileText size={18} />} 
                         label="查證與報告中心" 
                         active={activeTab === 'reports'} 
                         onClick={() => setActiveTab('reports')} 
                         highlight 
-                        colorClass="text-blue-400 border-blue-400 bg-blue-900/30"
+                        colorClass="text-sky-400 border-sky-400 bg-sky-900/20"
                     />
                     </nav>
 
-                    <div className="p-4 border-t border-slate-700">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-green-400 to-blue-500 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-slate-600">JD</div>
-                        <div>
-                        <p className="text-sm font-medium">John Doe</p>
-                        <p className="text-xs text-slate-400">ESG Manager</p>
+                    <div className="p-4 border-t border-slate-800 bg-slate-900">
+                    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-sky-500 flex items-center justify-center text-xs font-bold shadow-md">JD</div>
+                        <div className="overflow-hidden">
+                        <p className="text-sm font-medium text-white truncate">John Doe</p>
+                        <p className="text-xs text-slate-400 truncate">ESG Manager</p>
                         </div>
                     </div>
                     </div>
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 overflow-y-auto relative scroll-smooth">
+                <main className="flex-1 overflow-y-auto relative scroll-smooth bg-slate-50">
                     {/* Header */}
-                    <header className="bg-white/80 backdrop-blur-md shadow-sm p-4 px-8 flex justify-between items-center sticky top-0 z-10 border-b border-gray-100">
-                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        {activeTab === 'reports' ? '查證與報告中心' : 'ESG 整合戰情室'}
-                        {activeTab === 'reports' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full border border-blue-200">Auditor Mode</span>}
+                    <header className="bg-white/90 backdrop-blur-sm shadow-sm p-4 px-8 flex justify-between items-center sticky top-0 z-10 border-b border-slate-200">
+                    <h2 className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                        {getPageTitle()}
+                        {activeTab === 'reports' && <span className="text-[10px] bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-100 font-bold uppercase tracking-wide">Auditor Mode</span>}
                     </h2>
                     <div className="flex gap-3">
                         <button 
                             onClick={handleAiScan}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white transition-all shadow-sm ${isAiScanning ? 'bg-gray-400 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-700 hover:shadow-md active:scale-95'}`}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium transition-all shadow-sm ${isAiScanning ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-700 hover:shadow-md active:scale-95'}`}
                         >
-                        {isAiScanning ? 'Generating...' : <><Lock size={16} /> 產生查證連結</>}
+                        {isAiScanning ? 'Processing...' : <><Lock size={14} /> 產生查證連結</>}
                         </button>
                     </div>
                     </header>
 
                     <div className="p-8 space-y-8 max-w-7xl mx-auto">
-                    
-                    {activeTab === 'reports' ? (
-                        <div className="space-y-8 animate-[fadeIn_0.5s_ease-out]">
-                            {/* 1. 報告下載區 */}
-                            <section>
-                                <div className="flex justify-between items-end mb-4">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                            <FileText className="text-blue-600" /> 合規報告生成 (Report Generation)
-                                        </h3>
-                                        <p className="text-gray-500 text-sm mt-1">針對銀行 SLL 貸款與第三方查證單位 (如 SGS, BSI) 所需格式自動生成的報告。</p>
-                                    </div>
-                                </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    {AUDIT_REPORTS.map(report => (
-                                        <div key={report.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:-translate-y-1">
-                                            <div className="flex justify-between items-start mb-3">
-                                                <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded font-medium">{report.type}</span>
-                                                <CheckCircle2 size={18} className="text-green-500" />
-                                            </div>
-                                            <h4 className="font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">{report.title}</h4>
-                                            <p className="text-xs text-gray-400 mb-4">Generated on {report.date} • {report.size}</p>
-                                            <button className="w-full flex items-center justify-center gap-2 border border-gray-300 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all">
-                                                <Download size={16} /> 下載 PDF / Excel
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
-
-                            {/* 2. 數據溯源與稽核軌跡 */}
-                            <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                                <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                            <History className="text-purple-600" /> 數據溯源與稽核軌跡 (Audit Trail)
-                                        </h3>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            符合 ISAE 3000 確信標準。紀錄所有數據的產生、AI 運算與人為修正歷程。
-                                        </p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <input type="text" placeholder="搜尋車號或事件 ID..." className="text-sm border rounded-lg px-3 py-1.5 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" />
-                                    </div>
-                                </div>
-                                
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-sm text-left">
-                                        <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
-                                            <tr>
-                                                <th className="px-6 py-3">Timestamp</th>
-                                                <th className="px-6 py-3">Actor (User/System)</th>
-                                                <th className="px-6 py-3">Action</th>
-                                                <th className="px-6 py-3">Details / Evidence</th>
-                                                <th className="px-6 py-3">Integrity Hash</th>
-                                                <th className="px-6 py-3">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100">
-                                            {AUDIT_TRAIL.map(log => (
-                                                <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="px-6 py-4 font-mono text-gray-600">{log.timestamp}</td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${log.user.includes('System') || log.user.includes('AI') ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                                                            {log.user}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 font-medium text-gray-800">{log.action}</td>
-                                                    <td className="px-6 py-4 text-gray-600 max-w-xs truncate" title={log.details}>{log.details}</td>
-                                                    <td className="px-6 py-4 font-mono text-xs text-gray-400">{log.hash}</td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="flex items-center gap-1 text-green-600 text-xs font-medium">
-                                                            <CheckCircle2 size={12} /> Verified
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div className="p-4 bg-gray-50 border-t border-gray-200 text-center">
-                                    <button className="text-sm text-gray-500 hover:text-gray-700 font-medium hover:underline">載入更多歷史紀錄...</button>
-                                </div>
-                            </section>
-
-                            {/* 3. 查證員視角說明 */}
-                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6 flex gap-4 items-start">
-                                <div className="bg-white p-2 rounded-full text-blue-600 flex-shrink-0 shadow-sm">
-                                    <Eye size={24} />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-blue-800 mb-1">關於「第三方查證」支援</h4>
-                                    <p className="text-sm text-blue-700 leading-relaxed">
-                                        本平台所有數據均已自動結構化，可直接對接 <strong>ISO 14064-1 (溫室氣體)</strong> 與 <strong>GRI / SASB (社會指標)</strong> 標準。
-                                        點擊右上角「產生查證連結」，可生成一個「唯讀 (Read-only)」的臨時帳號給予查證員 (Auditor)，
-                                        讓他們直接進入系統查看原始數據 (Raw Data) 與計算公式，大幅縮短現場查核時間。
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        // Dashboard View
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-[fadeIn_0.5s_ease-out]">
-                            <KpiCard 
-                                title="總碳排放量 (Scope 1)" 
-                                value="1,240 kgCO2e" 
-                                trend="-5.2%" 
-                                trendUp={false} 
-                                icon={<Leaf className="text-green-600" />} 
-                                color="border-l-4 border-green-500"
-                            />
-                            <KpiCard 
-                                title="社會與人權風險分" 
-                                value={`${socialScore}/100`} 
-                                trend="+2.4" 
-                                trendUp={true} 
-                                icon={<ShieldCheck className="text-blue-600" />} 
-                                color="border-l-4 border-blue-500"
-                                subtitle="S-Quant AI 評估"
-                            />
-                             <KpiCard 
-                                title="SROI 社會投資報酬" 
-                                value="1 : 3.52" 
-                                trend="+0.12" 
-                                trendUp={true} 
-                                icon={<TrendingUp className="text-purple-600" />} 
-                                color="border-l-4 border-purple-500"
-                            />
-                            <KpiCard 
-                                title="高風險駕駛行為" 
-                                value="12 件" 
-                                trend="-3 件" 
-                                trendUp={false} 
-                                icon={<AlertTriangle className="text-orange-500" />} 
-                                color="border-l-4 border-orange-500"
-                            />
-                            
-                            {/* 車隊列表 (精簡版) */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:col-span-2">
-                                <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
-                                    <Truck size={18} /> 車隊即時監控
-                                </h3>
-                                <div className="space-y-3">
-                                    {FLEET_DATA.map((vehicle) => (
-                                    <div key={vehicle.id} onClick={() => setSelectedVehicle(vehicle)} className={`p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md ${selectedVehicle.id === vehicle.id ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-200 shadow-sm' : 'border-gray-100 hover:bg-gray-50'}`}>
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                <div className="font-bold text-gray-800">{vehicle.id}</div>
-                                                <div className="text-xs text-gray-500 flex items-center gap-1">
-                                                    {vehicle.driver} <span className="text-gray-300">|</span> <MapPin size={10}/> {vehicle.location}
-                                                </div>
-                                            </div>
-                                            <StatusBadge status={vehicle.status} />
-                                        </div>
-                                        <div className="space-y-2 mt-3">
-                                            <div className="flex justify-between text-xs">
-                                                <span className="text-gray-500">疲勞駕駛風險 (S)</span>
-                                                <span className={`font-bold ${vehicle.fatigue_risk === 'High' ? 'text-red-500' : 'text-blue-600'}`}>{vehicle.fatigue_risk}</span>
-                                            </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-1.5">
-                                                <div className={`h-1.5 rounded-full ${vehicle.fatigue_risk === 'High' ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: vehicle.fatigue_risk === 'High' ? '80%' : '30%' }}></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* AI 區塊 */}
-                            <div className="bg-white rounded-xl shadow-sm border border-emerald-100 p-6 relative overflow-hidden md:col-span-2">
-                                <div className="absolute top-0 right-0 p-2 opacity-10">
-                                    <BrainCircuit size={100} className="text-emerald-500" />
-                                </div>
-                                <h3 className="font-bold text-gray-800 mb-1 flex items-center gap-2">
-                                    <BrainCircuit className="text-emerald-600" size={20} />
-                                    S-Quant AI 駕駛分析
-                                </h3>
-                                <p className="text-xs text-gray-500 mb-4">針對車輛 {selectedVehicle.id} ({selectedVehicle.driver})</p>
-                                <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100 mb-2">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-sm font-semibold text-emerald-800">工時合規性</span>
-                                        <span className="text-sm font-bold text-emerald-600">{selectedVehicle.compliance}%</span>
-                                    </div>
-                                    <p className="text-xs text-gray-600">本週連續駕駛時數接近法規上限，建議即刻安排休息。</p>
-                                </div>
-                                <div className="bg-orange-50 p-3 rounded-lg border border-orange-100">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-sm font-semibold text-orange-800">心理壓力檢測</span>
-                                        <span className="text-sm font-bold text-orange-600">中等</span>
-                                    </div>
-                                    <p className="text-xs text-gray-600">急煞次數異常，AI 建議關注駕駛身心狀態。</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                        {renderContent()}
                     </div>
                 </main>
                 </div>
